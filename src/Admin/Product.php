@@ -7,6 +7,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Class Product
+ *
+ * Handles the addition of a custom "preorder" option to WooCommerce products
+ * and processes saving the associated meta data.
+ */
 class Product {
 
 	public function __construct() {
@@ -15,7 +21,12 @@ class Product {
 		add_action( 'woocommerce_admin_process_product_object', [ $this, 'save_product' ], 10, 1 );
 	}
 
-	public function add_preorder_option( $options ) {
+	/**
+	 * @param $options array Array of options.
+	 *
+	 * @return array Modified array of options with the preorder option included.
+	 */
+	public function add_preorder_option( array $options ): array {
 		$options['nt_preorder'] = [
 			'id'          => '_nt_preorder',
 //			'wrapper_class' => 'show_if_simple show_if_variable show_if_package',
@@ -28,7 +39,9 @@ class Product {
 	}
 
 	/**
-	 * @param $product \WC_Product
+	 * Updates the product's preorder meta data based on the presence of a specific POST parameter.
+	 *
+	 * @param \WC_Product $product The WooCommerce product being updated.
 	 *
 	 * @return void
 	 */

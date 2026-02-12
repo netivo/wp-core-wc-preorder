@@ -9,6 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Represents the primary module functionality, including initialization
+ * and access to the module directory path.
+ */
 class Module {
 
 	/**
@@ -28,6 +32,11 @@ class Module {
 
 	protected static ?self $instance = null;
 
+	/**
+	 * Retrieves the singleton instance of the class.
+	 *
+	 * @return self Returns the single instance of the class.
+	 */
 	public static function get_instance(): self {
 		if ( empty( self::$instance ) ) {
 			self::$instance = new self();

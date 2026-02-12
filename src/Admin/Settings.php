@@ -9,6 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Handles the integration of custom settings for WooCommerce related to preorders.
+ */
 class Settings {
 	protected string $options_slug = '_nt_manage_preorder';
 
@@ -21,13 +24,31 @@ class Settings {
 		], 10, 2 );
 	}
 
-	public function filter_woocommerce_get_sections_products( $sections ) {
+	/**
+	 * Filters the WooCommerce product sections to include a custom section.
+	 *
+	 * @param array $sections An array of existing WooCommerce product sections.
+	 *
+	 * @return array Modified array of WooCommerce product sections.
+	 */
+	public function filter_woocommerce_get_sections_products( array $sections ): array {
 		$sections[ $this->options_slug ] = __( 'Ustawienia Preorderu', 'netivo' );
 
 		return $sections;
 	}
 
-	public function filter_woocommerce_get_settings_for_section( $settings, $section_id ) {
+	/**
+	 * Filters the WooCommerce settings for a specified section.
+	 *
+	 * This method customizes the settings array for a specific WooCommerce settings section,
+	 * adding configuration options for displaying pre-order information.
+	 *
+	 * @param array $settings The original settings for the section.
+	 * @param string $section_id The ID of the section being filtered.
+	 *
+	 * @return array The modified settings array for the section.
+	 */
+	public function filter_woocommerce_get_settings_for_section( array $settings, string $section_id ): array {
 		if ( $section_id !== $this->options_slug ) {
 			return $settings;
 		}
