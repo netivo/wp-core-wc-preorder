@@ -16,18 +16,20 @@ class Product {
 	}
 
 	public function add_preorder_option( $options ) {
-		$options['preorder'] = [
-			'id'            => '_nt_preorder',
+		$options['nt_preorder'] = [
+			'id'          => '_nt_preorder',
 //			'wrapper_class' => 'show_if_simple show_if_variable show_if_package',
-			'label'         => __( 'Przedsprzedaż', 'netivo' ),
-			'description'   => __( 'Dodaje do tytułu informację o preorderze oraz w opisie datę premiery.', 'netivo' ),
-			'default'       => 'no',
+			'label'       => __( 'Przedsprzedaż', 'netivo' ),
+			'description' => __( 'Dodaje do tytułu informację o preorderze oraz w opisie datę premiery.', 'netivo' ),
+			'default'     => 'no',
 		];
+
 		return $options;
 	}
 
 	/**
 	 * @param $product \WC_Product
+	 *
 	 * @return void
 	 */
 	public function save_product( \WC_Product $product ): void {
