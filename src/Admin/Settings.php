@@ -13,12 +13,12 @@ class Settings {
 	protected string $options_slug = '_nt_manage_preorder';
 
 	public function __construct() {
-		add_filter( 'woocommerce_get_sections_products', [ $this, 'filter_woocommerce_get_sections_products' ] );
+		add_filter( 'woocommerce_get_sections_products', [ $this, 'filter_woocommerce_get_sections_products' ], 10, 1 );
 
 		add_action( 'woocommerce_get_settings_products', [
 			$this,
 			'filter_woocommerce_get_settings_for_section'
-		] );
+		], 10, 2 );
 	}
 
 	public function filter_woocommerce_get_sections_products( $sections ) {
@@ -32,27 +32,40 @@ class Settings {
 			return $settings;
 		}
 
-		$settings = array(
-			array(
-				'title'    => __( 'Ustawienia Preorderu', 'netivo' ),
-				'id'       => 'nt_preorder_text',
-				'type'     => 'text',
-				'default'  => __( '[PRZEDSPRZEDAŻ]', 'netivo' ),
-				'desc'     => __( 'Tekst wyświetlany przy tytule produktu', 'netivo' ),
-				'desc_tip' => true
+		$settings = [];
+
+		$settings[] = array(
+			'name' => __( 'Informacja o preorderze', 'netivo' ),
+			'type' => 'title',
+			'desc' => __( 'Opcje pozwalające na konfiguracje wyświetlania informacji o preorderze', 'netivo' ),
+			'id'   => 'nt_preorder_settings'
+		);
+
+		$settings[] = array(
+			'title'    => __( 'Ustawienia Preorderu', 'netivo' ),
+			'id'       => 'nt_preorder_text',
+			'type'     => 'text',
+			'default'  => __( '[PRZEDSPRZEDAŻ]', 'netivo' ),
+			'desc'     => __( 'Tekst wyświetlany przy tytule produktu', 'netivo' ),
+			'desc_tip' => true
+		);
+
+		$settings[] = array(
+			'title'    => __( 'Pozycja tekstu w tytule produktu', 'netivo' ),
+			'id'       => 'nt_preorder_position',
+			'type'     => 'select',
+			'default'  => 'before',
+			'options'  => array(
+				'before' => __( 'Przed tytułem', 'netivo' ),
+				'after'  => __( 'Za tytułem', 'netivo' )
 			),
-			array(
-				'title'    => __( 'Pozycja tekstu w tytule produktu', 'netivo' ),
-				'id'       => 'nt_preorder_position',
-				'type'     => 'select',
-				'default'  => 'before',
-				'options'  => array(
-					'before' => __( 'Przed tytułem', 'netivo' ),
-					'after'  => __( 'Za tytułem', 'netivo' )
-				),
-				'desc'     => __( 'Wybierz, czy tekst ma być wyświetlany przed czy za tytułem produktu.', 'netivo' ),
-				'desc_tip' => true
-			)
+			'desc'     => __( 'Wybierz, czy tekst ma być wyświetlany przed czy za tytułem produktu.', 'netivo' ),
+			'desc_tip' => true
+		);
+
+		$settings[] = array(
+			'type' => 'sectionend',
+			'id'   => 'nt_preorder_settings'
 		);
 
 		return $settings;
