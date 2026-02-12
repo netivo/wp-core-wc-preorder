@@ -2,7 +2,7 @@
 
 namespace Netivo\Module\WooCommerce\ProductPreorder;
 
-use Netivo\Module\WooCommerce\ProductPreorder\Admin\Product;
+use Netivo\Module\WooCommerce\ProductPreorder\Admin\Panel;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	header( 'HTTP/1.0 403 Forbidden' );
@@ -27,6 +27,7 @@ class Module {
 	}
 
 	protected static ?self $instance = null;
+
 	public static function get_instance(): self {
 		if ( empty( self::$instance ) ) {
 			self::$instance = new self();
@@ -36,7 +37,9 @@ class Module {
 	}
 
 	public function __construct() {
-		new Product(); //Czy tylko dla admina?
-		new WooCommerce();
+		new Product();
+		if ( is_admin() ) {
+			new Panel();
+		}
 	}
 }

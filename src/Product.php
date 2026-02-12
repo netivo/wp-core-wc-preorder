@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class WooCommerce {
+class Product {
 
 	public function __construct() {
 		add_filter( 'the_title', [ $this, 'nt_preorder_title' ], 10, 2 );
