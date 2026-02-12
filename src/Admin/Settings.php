@@ -10,41 +10,51 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Settings {
-	protected string $options_slug = 'netivo_manage_preorder';
+	protected string $options_slug = '_nt_manage_preorder';
 
 	public function __construct() {
-		add_filter( 'woocommerce_settings_tabs_array', [ $this, 'filter_woocommerce_settings_tabs_array' ] );
+		add_filter( 'woocommerce_get_sections_products', [ $this, 'filter_woocommerce_get_sections_products' ] );
 
-		add_action( 'woocommerce_sections_preorder-settings', [
+		add_action( 'woocommerce_get_settings_products', [
 			$this,
-			'action_woocommerce_sections_preorder_settings'
+			'filter_woocommerce_get_settings_for_section'
 		] );
 	}
 
-	public function filter_woocommerce_settings_tabs_array( $settings_tabs ) {
-		$settings_tabs['preorder-settings'] = __( 'Ustawienia Preorderu', 'netivo' );
+	public function filter_woocommerce_get_sections_products( $sections ) {
+		$sections[ $this->options_slug ] = __( 'Ustawienia Preorderu', 'netivo' );
 
-		return $settings_tabs;
+		return $sections;
 	}
 
-	public function action_woocommerce_sections_preorder_settings() {
-		global $current_section;
-
-		$tab_id = 'preorder-settings';
-
-		$sections = array(
-			'' => __( 'Ogólne', 'netivo' ),
-			'section-1' => __( 'sekcja 1', 'netivo' ),
-		);
-
-		echo '<ul class="subsubsub">';
-
-		$array_keys = array_keys( $sections );
-
-		foreach ( $array_keys as $id => $label ) {
-			echo '<li><a href="' . admin_url( 'admin.php?page=wc-settings&tab=' . $tab_id . '&section=' . sanitize_title( $id ) ) . '" class="' . ( $current_section == $id ? 'current' : '' ) . '">' . $label . '</a> ' . ( end( $array_keys ) == $id ? '' : '|' ) . ' </li>';
+	public function filter_woocommerce_get_settings_for_section( $settings, $section_id ) {
+		if ( $section_id !== $this->options_slug ) {
+			return $settings;
 		}
 
-		echo '</ul><br class="clear" />';
+		$settings = array(
+			array(
+				'title'    => __( 'Ustawienia Preorderu', 'netivo' ),
+				'id'       => 'nt_preorder_text',
+				'type'     => 'text',
+				'default'  => __( '[PRZEDSPRZEDAŻ]', 'netivo' ),
+				'desc'     => __( 'Tekst wyświetlany przy tytule produktu', 'netivo' ),
+				'desc_tip' => true
+			),
+			array(
+				'title'    => __( 'Pozycja tekstu w tytule produktu', 'netivo' ),
+				'id'       => 'nt_preorder_position',
+				'type'     => 'select',
+				'default'  => 'before',
+				'options'  => array(
+					'before' => __( 'Przed tytułem', 'netivo' ),
+					'after'  => __( 'Za tytułem', 'netivo' )
+				),
+				'desc'     => __( 'Wybierz, czy tekst ma być wyświetlany przed czy za tytułem produktu.', 'netivo' ),
+				'desc_tip' => true
+			)
+		);
+
+		return $settings;
 	}
 }

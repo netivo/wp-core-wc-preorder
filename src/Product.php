@@ -14,8 +14,15 @@ class Product {
 	}
 
 	public function nt_preorder_title( $title, $post_id ) {
-		if( get_post_meta( $post_id, '_nt_preorder', true ) == 'yes' ) {
-			$title = $title . ' ' . __( '[PRZEDSPRZEDAŻ]', 'netivo' );
+		if ( get_post_meta( $post_id, '_nt_preorder', true ) == 'yes' ) {
+			$text     = get_option( 'nt_preorder_text' );
+			$position = get_option( 'nt_preorder_position' );
+
+			if ( $position == 'before' ) {
+				$title = $text . ' ' . $title;
+			} else if ( $position == 'after' ) {
+				$title = $title . ' ' . $text;
+			}
 		}
 
 		return $title;
