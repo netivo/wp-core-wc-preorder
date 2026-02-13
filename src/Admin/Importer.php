@@ -15,34 +15,37 @@ class Importer {
 			$this,
 			'add_column_to_mapping_screen'
 		] );
-		add_filter( 'woocommerce_product_import_pre_insert_product_object', [ $this, 'process_import' ] );
+		add_filter( 'woocommerce_product_import_pre_insert_product_object', [ $this, 'process_import' ], 10, 2 );
 
 		add_filter( 'woocommerce_product_export_column_names', [ $this, 'add_export_column' ] );
 		add_filter( 'woocommerce_product_export_product_default_columns', [ $this, 'add_export_column' ] );
-		add_filter( 'woocommerce_product_export_product_column_custom_column', [ $this, 'add_export_data' ] );
+		add_filter( 'woocommerce_product_export_product_column_nt_preorder', [ $this, 'add_export_data' ], 10, 2 );
 	}
 
-	protected function add_column_to_importer( array $options ): array {
+	public function add_column_to_importer( array $options ): array {
 		$options['nt_preorder'] = 'Przedsprzedaż';
 
 		return $options;
 	}
 
-	protected function add_column_to_mapping_screen( array $columns ): array {
-		$columns['nt_preorder'] = 'Przedsprzedaż';
+	public function add_column_to_mapping_screen( array $columns ): array {
+		$columns['Przedsprzedaż'] = 'nt_preorder';
 
 		return $columns;
 	}
 
-	protected function process_import( $product, $data ): array {
+	public function process_import( $product, $data ) {
 		if ( ! empty( $data['nt_preorder'] ) ) {
-			$preorder    = $data['nt_preorder'];
-			$true_values = [ 'yes', '1', 'true', 'tak' ];
+			$preorder     = $data['nt_preorder'];
+			$true_values  = [ 'yes', '1', 'true', 'tak' ];
+			$false_values = [ 'no', '0', 'false', 'nie' ];
 
 			if ( in_array( strtolower( $preorder ), $true_values ) ) {
 				$preorder = 'yes';
-			} else {
+			} elseif ( in_array( strtolower( $preorder ), $false_values ) ) {
 				$preorder = 'no';
+			} else {
+				return $product;
 			}
 
 			$product->update_meta_data( '_nt_preorder', $preorder );
@@ -51,13 +54,15 @@ class Importer {
 		return $product;
 	}
 
-	protected function add_export_column( array $columns ): array {
+	public function add_export_column( array $columns ): array {
 		$columns['nt_preorder'] = 'Przedsprzedaż';
 
 		return $columns;
 	}
 
-	protected function add_export_data( $value, $product ): string {
-		return $product->get_meta( '_nt_preorder', true, 'edit' );
+	public function add_export_data( $value, $product ): string {
+		$value = $product->get_meta( '_nt_preorder', true, 'edit' );
+
+		return $value;
 	}
 }

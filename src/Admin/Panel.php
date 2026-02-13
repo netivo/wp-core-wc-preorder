@@ -11,5 +11,6 @@ class Panel {
 	public function __construct() {
 		new Settings();
 		new Product();
+		new Importer();
 	}
 }
