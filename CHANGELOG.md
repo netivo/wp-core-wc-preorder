@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.2
+
+- Added handling preorder option in the import/export
+
 ## Version 1.1
 
 - Added option for the preorder text
