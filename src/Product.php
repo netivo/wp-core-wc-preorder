@@ -28,8 +28,8 @@ class Product {
 	 */
 	public function nt_preorder_title( string $title, int $post_id ): string {
 		if ( get_post_meta( $post_id, '_nt_preorder', true ) == 'yes' ) {
-			$text     = get_option( 'nt_preorder_text' );
-			$position = get_option( 'nt_preorder_position' );
+			$text     = get_option( 'nt_preorder_text', '[PREORDER]' );
+			$position = get_option( 'nt_preorder_position', 'before' );
 
 			if ( $position == 'before' ) {
 				$title = $text . ' ' . $title;
