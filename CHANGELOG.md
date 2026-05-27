@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.2.1
+
+- Added default value for the preorder text and position
+
 ## Version 1.2
 
 - Added handling preorder option in the import/export
