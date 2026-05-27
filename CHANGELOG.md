@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.2.2
+
+- Fixed bug with the preorder text not showing in cart and checkout page
+
 ## Version 1.2.1
 
 - Added default value for the preorder text and position
