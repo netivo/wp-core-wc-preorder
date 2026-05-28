@@ -3,6 +3,7 @@
 ## Version 1.3.0
 
 - Added support for post search
+- Added setting for possible preorder text in search results
 
 ## Version 1.2.2
 

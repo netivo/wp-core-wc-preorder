@@ -100,7 +100,7 @@ class Product {
 
 		$search_terms = $this->get_preorder_search_terms();
 
-		if ( in_array( strtolower( trim( $search_query ) ), array_unique( $search_terms ), true ) ) {
+		if ( in_array( strtolower( trim( $search_query ) ), $search_terms, true ) ) {
 			global $wpdb;
 
 			// Join with postmeta to filter by _nt_preorder
@@ -120,7 +120,7 @@ class Product {
 	 * @return array
 	 */
 	protected function get_preorder_search_terms(): array {
-		return [
+		$terms = [
 			'przedsprzedaz',
 			'przedsprzedaż',
 			'preorder',
@@ -128,5 +128,19 @@ class Product {
 			strtolower( trim( $this->text ) ),
 			strtolower( trim( str_replace( [ '[', ']' ], '', $this->text ) ) ),
 		];
+
+		$additional_terms = get_option( 'nt_preorder_search_terms', '' );
+
+		if ( ! empty( $additional_terms ) ) {
+			$additional_terms_array = explode( "\n", str_replace( "\r", '', $additional_terms ) );
+			foreach ( $additional_terms_array as $term ) {
+				$term = strtolower( trim( $term ) );
+				if ( ! empty( $term ) ) {
+					$terms[] = $term;
+				}
+			}
+		}
+
+		return array_unique( $terms );
 	}
 }
