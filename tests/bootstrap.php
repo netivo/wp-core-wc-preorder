@@ -49,6 +49,12 @@ if ( ! function_exists( 'get_option' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_sql' ) ) {
+	function esc_sql( $data ) {
+		return $data;
+	}
+}
+
 if ( ! class_exists( 'WC_Product' ) ) {
 	class WC_Product {
 		public function update_meta_data( $key, $value ) {
