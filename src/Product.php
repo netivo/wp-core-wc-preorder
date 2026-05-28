@@ -93,12 +93,16 @@ class Product {
 			return $clauses;
 		}
 		global $wpdb;
-		$meta_key   = esc_sql( '_nt_preorder' );
-		$meta_value = esc_sql( 'yes' );
 
 		// Join with postmeta to filter by _nt_preorder
-		$clauses['join'] .= " INNER JOIN {$wpdb->postmeta} AS nt_preorder_pm ON ({$wpdb->posts}.ID = nt_preorder_pm.post_id AND nt_preorder_pm.meta_key = '{$meta_key}') ";
-		$clauses['where'] .= " AND nt_preorder_pm.meta_value = '{$meta_value}' ";
+		$clauses['join'] .= $wpdb->prepare(
+			" LEFT JOIN {$wpdb->postmeta} AS nt_preorder_pm ON ({$wpdb->posts}.ID = nt_preorder_pm.post_id AND nt_preorder_pm.meta_key = %s) ",
+			'_nt_preorder'
+		);
+		$clauses['where'] .= $wpdb->prepare(
+			" AND nt_preorder_pm.meta_value = %s ",
+			'yes'
+		);
 
 		return $clauses;
 	}

@@ -70,6 +70,16 @@ class ProductTest extends TestCase {
 		$GLOBALS['wpdb']                        = new class() {
 			public string $postmeta = 'wp_postmeta';
 			public string $posts = 'wp_posts';
+
+			public function prepare( string $query, ...$args ): string {
+				return vsprintf(
+					$query,
+					array_map(
+						static fn( string $value ): string => "'" . $value . "'",
+						$args
+					)
+				);
+			}
 		};
 
 		$product = new Product();
@@ -81,7 +91,7 @@ class ProductTest extends TestCase {
 
 		$result = $product->modify_preorder_posts_clauses( $clauses, $query );
 
-		$this->assertStringContainsString( 'INNER JOIN wp_postmeta AS nt_preorder_pm', $result['join'] );
+		$this->assertStringContainsString( 'LEFT JOIN wp_postmeta AS nt_preorder_pm', $result['join'] );
 		$this->assertStringContainsString( "AND nt_preorder_pm.meta_value = 'yes'", $result['where'] );
 		$this->assertStringNotContainsString( "OR nt_preorder_pm.meta_value = 'yes'", $result['where'] );
 	}
