@@ -40,6 +40,7 @@ class Product {
 		add_filter( 'the_title', [ $this, 'nt_preorder_title' ], 10, 2 );
 		add_filter( 'woocommerce_cart_item_name', [ $this, 'nt_preorder_title' ], 10, 2 );
 		add_filter( 'woocommerce_order_item_get_name', [ $this, 'nt_preorder_title' ], 10, 2 );
+		add_filter( 'posts_search', [ $this, 'filter_preorder_posts_search' ], 10, 2 );
 		add_filter( 'posts_clauses', [ $this, 'modify_preorder_posts_clauses' ], 10, 2 );
 	}
 
@@ -88,30 +89,32 @@ class Product {
 	 * @return array
 	 */
 	public function modify_preorder_posts_clauses( array $clauses, WP_Query $query ): array {
-		if ( is_admin() || ! $query->is_main_query() || ! is_post_type_archive( 'product' ) ) {
+		if ( ! $this->should_filter_preorder_search( $query ) ) {
 			return $clauses;
 		}
+		global $wpdb;
 
-		$search_query = $query->get( 's' );
-
-		if ( empty( $search_query ) ) {
-			return $clauses;
-		}
-
-		$search_terms = $this->get_preorder_search_terms();
-
-		if ( in_array( strtolower( trim( $search_query ) ), $search_terms, true ) ) {
-			global $wpdb;
-
-			// Join with postmeta to filter by _nt_preorder
-			$clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS nt_preorder_pm ON ({$wpdb->posts}.ID = nt_preorder_pm.post_id AND nt_preorder_pm.meta_key = '_nt_preorder') ";
-
-			// Force the where clause to only include preorder products and ignore the standard search 's' for where clause
-			// We keep 's' in the query object so breadcrumbs and titles work automatically
-			$clauses['where'] .= " OR nt_preorder_pm.meta_value = 'yes' ";
-		}
+		// Join with postmeta to filter by _nt_preorder
+		$clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS nt_preorder_pm ON ({$wpdb->posts}.ID = nt_preorder_pm.post_id AND nt_preorder_pm.meta_key = '_nt_preorder') ";
+		$clauses['where'] .= " AND nt_preorder_pm.meta_value = 'yes' ";
 
 		return $clauses;
+	}
+
+	/**
+	 * Removes the default search SQL when the preorder search terms are used.
+	 *
+	 * @param string $search
+	 * @param WP_Query $query
+	 *
+	 * @return string
+	 */
+	public function filter_preorder_posts_search( string $search, WP_Query $query ): string {
+		if ( $this->should_filter_preorder_search( $query ) ) {
+			return '';
+		}
+
+		return $search;
 	}
 
 	/**
@@ -142,5 +145,26 @@ class Product {
 		}
 
 		return array_unique( $terms );
+	}
+
+	/**
+	 * Checks if the current query should return preorder products for the search term.
+	 *
+	 * @param WP_Query $query
+	 *
+	 * @return bool
+	 */
+	protected function should_filter_preorder_search( WP_Query $query ): bool {
+		if ( is_admin() || ! $query->is_main_query() || ! is_post_type_archive( 'product' ) ) {
+			return false;
+		}
+
+		$search_query = trim( (string) $query->get( 's' ) );
+
+		if ( $search_query === '' ) {
+			return false;
+		}
+
+		return in_array( strtolower( $search_query ), $this->get_preorder_search_terms(), true );
 	}
 }
