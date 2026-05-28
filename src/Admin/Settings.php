@@ -85,6 +85,16 @@ class Settings {
 		);
 
 		$settings[] = array(
+			'title'    => __( 'Dodatkowe frazy wyszukiwania', 'netivo' ),
+			'id'       => 'nt_preorder_search_terms',
+			'type'     => 'textarea',
+			'default'  => '',
+			'desc'     => __( 'Dodatkowe frazy (każda w nowej linii), po których produkty z preorderem będą wyszukiwane.', 'netivo' ),
+			'desc_tip' => true,
+			'css'      => 'min-width:300px;min-height:100px;'
+		);
+
+		$settings[] = array(
 			'type' => 'sectionend',
 			'id'   => 'nt_preorder_settings'
 		);
