@@ -88,7 +88,7 @@ class Product {
 	 * @return array
 	 */
 	public function modify_preorder_posts_clauses( array $clauses, WP_Query $query ): array {
-		if ( is_admin() || ! $query->is_main_query() || ! $query->is_post_type_archive( 'product' ) ) {
+		if ( is_admin() || ! $query->is_main_query() || ! is_post_type_archive( 'product' ) ) {
 			return $clauses;
 		}
 
@@ -104,11 +104,11 @@ class Product {
 			global $wpdb;
 
 			// Join with postmeta to filter by _nt_preorder
-			$clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS nt_pm ON ({$wpdb->posts}.ID = nt_pm.post_id AND nt_pm.meta_key = '_nt_preorder') ";
+			$clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS nt_preorder_pm ON ({$wpdb->posts}.ID = nt_preorder_pm.post_id AND nt_preorder_pm.meta_key = '_nt_preorder') ";
 
 			// Force the where clause to only include preorder products and ignore the standard search 's' for where clause
 			// We keep 's' in the query object so breadcrumbs and titles work automatically
-			$clauses['where'] = " AND nt_pm.meta_value = 'yes' AND {$wpdb->posts}.post_type = 'product' AND {$wpdb->posts}.post_status = 'publish' ";
+			$clauses['where'] .= " OR nt_preorder_pm.meta_value = 'yes' ";
 		}
 
 		return $clauses;
