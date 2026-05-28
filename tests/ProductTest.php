@@ -67,10 +67,20 @@ class ProductTest extends TestCase {
 
 	public function test_modify_preorder_posts_clauses_adds_preorder_only_filter() {
 		$GLOBALS['is_post_type_archive_return'] = true;
-		$GLOBALS['wpdb']                        = (object) [
-			'postmeta' => 'wp_postmeta',
-			'posts'    => 'wp_posts',
-		];
+		$GLOBALS['wpdb']                        = new class() {
+			public string $postmeta = 'wp_postmeta';
+			public string $posts = 'wp_posts';
+
+			public function prepare( string $query, ...$args ): string {
+				return vsprintf(
+					$query,
+					array_map(
+						static fn( string $value ): string => "'" . $value . "'",
+						$args
+					)
+				);
+			}
+		};
 
 		$product = new Product();
 		$query   = new \WP_Query( [ 's' => 'preorder' ] );
