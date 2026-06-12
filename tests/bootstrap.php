@@ -31,6 +31,12 @@ if ( ! function_exists( 'is_admin' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_post_type_archive' ) ) {
+	function is_post_type_archive( $post_type = '' ) {
+		return $GLOBALS['is_post_type_archive_return'] ?? false;
+	}
+}
+
 if ( ! function_exists( 'get_post_meta' ) ) {
 	function get_post_meta( $post_id, $key = '', $single = false ) {
 		return $GLOBALS['post_meta_return'] ?? '';
@@ -46,6 +52,26 @@ if ( ! function_exists( 'get_option' ) ) {
 if ( ! class_exists( 'WC_Product' ) ) {
 	class WC_Product {
 		public function update_meta_data( $key, $value ) {
+		}
+	}
+}
+
+if ( ! class_exists( 'WP_Query' ) ) {
+	class WP_Query {
+		private array $query_vars;
+		private bool $main_query;
+
+		public function __construct( array $query_vars = [], bool $main_query = true ) {
+			$this->query_vars = $query_vars;
+			$this->main_query = $main_query;
+		}
+
+		public function is_main_query(): bool {
+			return $this->main_query;
+		}
+
+		public function get( string $key ) {
+			return $this->query_vars[ $key ] ?? null;
 		}
 	}
 }

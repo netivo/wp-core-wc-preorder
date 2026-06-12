@@ -35,9 +35,10 @@ class SettingsTest extends TestCase {
 		$result = $settings->filter_woocommerce_get_settings_for_section( $original_settings, '_nt_manage_preorder' );
 
 		$this->assertNotEquals( $original_settings, $result );
-		$this->assertCount( 4, $result );
+		$this->assertCount( 5, $result );
 		$this->assertEquals( 'nt_preorder_settings', $result[0]['id'] );
 		$this->assertEquals( 'nt_preorder_text', $result[1]['id'] );
 		$this->assertEquals( 'nt_preorder_position', $result[2]['id'] );
+		$this->assertEquals( 'nt_preorder_search_terms', $result[3]['id'] );
 	}
 }
