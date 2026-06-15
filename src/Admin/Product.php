@@ -19,6 +19,7 @@ class Product {
 		add_filter( 'product_type_options', [ $this, 'add_preorder_option' ], 10, 1 );
 
 		add_action( 'woocommerce_admin_process_product_object', [ $this, 'save_product' ], 10, 1 );
+		add_action( 'woocommerce_product_options_pricing', [ $this, 'render_preorder_date_input' ], 5 );
 	}
 
 	/**
@@ -38,6 +39,16 @@ class Product {
 		return $options;
 	}
 
+	public function render_preorder_date_input(): void {
+		$date_input_html_pattern = '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])';
+		$preorder_date           = get_post_meta( get_the_ID(), '_nt_preorder_date', true );
+
+		echo '<p class="form-field">
+					<label for="_nt_preorder_date">' . esc_html__( 'Data premiery', 'netivo' ) . '</label>
+					<input type="text" class="short" name="_nt_preorder_date" id="_nt_preorder_date" value="' . esc_attr( $preorder_date ) . '" placeholder="YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( $date_input_html_pattern ) . '" />
+				</p>';
+	}
+
 	/**
 	 * Updates the product's preorder meta data based on the presence of a specific POST parameter.
 	 *
@@ -47,5 +58,11 @@ class Product {
 	 */
 	public function save_product( \WC_Product $product ): void {
 		$product->update_meta_data( '_nt_preorder', ( isset( $_POST['_nt_preorder'] ) ) ? 'yes' : 'no' );
+
+		if ( ! empty( $_POST['_nt_preorder_date'] ) ) {
+			$product->update_meta_data( '_nt_preorder_date', $_POST['_nt_preorder_date'] );
+		} else {
+			$product->delete_meta_data( '_nt_preorder_date' );
+		}
 	}
 }

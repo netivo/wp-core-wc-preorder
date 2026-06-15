@@ -65,6 +65,21 @@ class ProductTest extends TestCase {
 		$this->assertSame( '', $product->filter_preorder_posts_search( " AND ((wp_posts.post_title LIKE '%preorder%'))", $query ) );
 	}
 
+	public function test_nt_preorder_title_already_contains_prefix() {
+		$GLOBALS['post_meta_return'] = 'yes';
+		$GLOBALS['options_return']   = [
+			'nt_preorder_text'     => '[PREORDER]',
+			'nt_preorder_position' => 'before'
+		];
+
+		$product = new Product();
+
+		$title  = '[PREORDER] Sample Product';
+		$result = $product->nt_preorder_title( $title, 123 );
+
+		$this->assertEquals( $title, $result );
+	}
+
 	public function test_modify_preorder_posts_clauses_adds_preorder_only_filter() {
 		$GLOBALS['is_post_type_archive_return'] = true;
 		$GLOBALS['wpdb']                        = new class() {
