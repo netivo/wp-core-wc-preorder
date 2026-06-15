@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.4.0
+
+- Added preorder date
+- Added validation for preorder date (for displaying preorder text)
+
 ## Version 1.3.0
 
 - Added support for post search
