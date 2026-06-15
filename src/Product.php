@@ -38,8 +38,10 @@ class Product {
 	 */
 	protected function init_filters(): void {
 		add_filter( 'the_title', [ $this, 'nt_preorder_title' ], 10, 2 );
-		add_filter( 'woocommerce_cart_item_name', [ $this, 'nt_preorder_title' ], 10, 2 );
-		add_filter( 'woocommerce_order_item_get_name', [ $this, 'nt_preorder_title' ], 10, 2 );
+//		add_filter( 'woocommerce_cart_item_name', [ $this, 'nt_preorder_title' ], 10, 2 );
+//		add_filter( 'woocommerce_order_item_get_name', [ $this, 'nt_preorder_title' ], 10, 2 );
+		add_filter( 'woocommerce_product_get_name', [ $this, 'nt_preorder_title' ], 10, 2 );
+		add_filter( 'woocommerce_product_variation_get_name', [ $this, 'nt_preorder_title' ], 10, 2 );
 		add_filter( 'posts_clauses', [ $this, 'modify_preorder_posts_clauses' ], 10, 2 );
 	}
 
@@ -49,6 +51,7 @@ class Product {
 	 * @return void
 	 */
 	protected function init_actions(): void {
+		add_action( 'woocommerce_single_product_summary', [ $this, 'render_preorder_date' ], 9 );
 	}
 
 	/**
@@ -62,18 +65,32 @@ class Product {
 	public function nt_preorder_title( string $title, mixed $post ): string {
 		if ( is_a( $post, 'WC_Order_Item_Product' ) ) {
 			$post_id = $post->get_product_id();
+		} else if ( is_a( $post, 'WC_Product' ) ) {
+			$post_id = $post->get_id();
 		} else if ( is_array( $post ) && isset( $post['product_id'] ) ) {
 			$post_id = $post['product_id'];
+		} else if ( is_numeric( $post ) ) {
+			$post_id = (int) $post;
 		} else {
-			$post_id = $post;
+			return $title;
 		}
-		if ( get_post_meta( $post_id, '_nt_preorder', true ) === 'yes' ) {
 
-			if ( $this->position === 'before' ) {
-				$title = $this->text . ' ' . $title;
-			} else if ( $this->position === 'after' ) {
-				$title = $title . ' ' . $this->text;
-			}
+		if ( empty( $post_id ) ) {
+			return $title;
+		}
+
+		if ( ! $this->should_show_preorder_title( $post_id ) ) {
+			return $title;
+		}
+
+		if ( str_contains( $title, $this->text ) ) {
+			return $title;
+		}
+
+		if ( $this->position === 'before' ) {
+			$title = $this->text . ' ' . $title;
+		} else if ( $this->position === 'after' ) {
+			$title = $title . ' ' . $this->text;
 		}
 
 		return $title;
@@ -142,5 +159,39 @@ class Product {
 		}
 
 		return array_unique( $terms );
+	}
+
+	public function render_preorder_date(): void {
+		$post_id       = get_the_ID();
+		$preorder_date = get_post_meta( $post_id, '_nt_preorder_date', true );
+
+		if ( ! empty( $preorder_date ) && $this->should_show_preorder_title( $post_id ) ) {
+			echo '<p class="">' . esc_html__( 'Data premiery: ', 'netivo' ) . esc_html( $preorder_date ) . '</p>';
+		}
+	}
+
+	/**
+	 * Checks if the preorder title should be shown based on the release date.
+	 *
+	 * @param int $post_id The ID of the post.
+	 *
+	 * @return bool True if the preorder title should be shown, false otherwise.
+	 */
+	public function should_show_preorder_title( int $post_id ): bool {
+		if ( get_post_meta( $post_id, '_nt_preorder', true ) !== 'yes' ) {
+			return false;
+		}
+
+		$preorder_date = get_post_meta( $post_id, '_nt_preorder_date', true );
+
+		if ( ! empty( $preorder_date ) ) {
+			$current_date = date( 'Y-m-d' );
+
+			if ( $preorder_date <= $current_date ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
