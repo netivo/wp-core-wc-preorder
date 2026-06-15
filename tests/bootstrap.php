@@ -39,6 +39,10 @@ if ( ! function_exists( 'is_post_type_archive' ) ) {
 
 if ( ! function_exists( 'get_post_meta' ) ) {
 	function get_post_meta( $post_id, $key = '', $single = false ) {
+		if ( isset( $GLOBALS['post_meta_map'][ $key ] ) ) {
+			return $GLOBALS['post_meta_map'][ $key ];
+		}
+
 		return $GLOBALS['post_meta_return'] ?? '';
 	}
 }
