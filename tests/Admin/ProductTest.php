@@ -54,4 +54,47 @@ class ProductTest extends TestCase {
 
 		$admin_product->save_product( $product );
 	}
+
+	public function test_save_product_stores_valid_release_date() {
+		$admin_product = new Product();
+
+		/** @var WC_Product|\PHPUnit\Framework\MockObject\MockObject $product */
+		$product = $this->createMock( WC_Product::class );
+
+		$_POST['_nt_preorder']      = 'yes';
+		$_POST['_nt_preorder_date'] = '2026-12-30';
+
+		$calls = [];
+		$product->expects( $this->exactly( 2 ) )
+		        ->method( 'update_meta_data' )
+		        ->willReturnCallback( function ( $key, $value ) use ( &$calls ) {
+			        $calls[ $key ] = $value;
+		        } );
+		$product->expects( $this->never() )->method( 'delete_meta_data' );
+
+		$admin_product->save_product( $product );
+
+		$this->assertSame( [ '_nt_preorder' => 'yes', '_nt_preorder_date' => '2026-12-30' ], $calls );
+
+		unset( $_POST['_nt_preorder'], $_POST['_nt_preorder_date'] );
+	}
+
+	public function test_save_product_ignores_malformed_release_date() {
+		$admin_product = new Product();
+
+		/** @var WC_Product|\PHPUnit\Framework\MockObject\MockObject $product */
+		$product = $this->createMock( WC_Product::class );
+
+		$_POST['_nt_preorder']      = 'yes';
+		$_POST['_nt_preorder_date'] = '30.12.2026';
+
+		$product->expects( $this->once() )
+		        ->method( 'update_meta_data' )
+		        ->with( '_nt_preorder', 'yes' );
+		$product->expects( $this->never() )->method( 'delete_meta_data' );
+
+		$admin_product->save_product( $product );
+
+		unset( $_POST['_nt_preorder'], $_POST['_nt_preorder_date'] );
+	}
 }

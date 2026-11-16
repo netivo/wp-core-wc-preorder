@@ -178,20 +178,81 @@ class Product {
 	 * @return bool True if the preorder title should be shown, false otherwise.
 	 */
 	public function should_show_preorder_title( int $post_id ): bool {
+		return self::is_preorder_active( $post_id );
+	}
+
+	/**
+	 * Single source of truth for "is this product currently presented as a preorder".
+	 *
+	 * The product is a preorder when the checkbox is checked and the release date
+	 * (if any) has not been reached yet. Use this from the theme as well, so every
+	 * preorder-dependent element (title, release date, shipping time) agrees.
+	 *
+	 * @param int $post_id The ID of the post.
+	 *
+	 * @return bool
+	 */
+	public static function is_preorder_active( int $post_id ): bool {
 		if ( get_post_meta( $post_id, '_nt_preorder', true ) !== 'yes' ) {
 			return false;
 		}
 
-		$preorder_date = get_post_meta( $post_id, '_nt_preorder_date', true );
+		return ! self::is_release_date_reached( $post_id );
+	}
 
-		if ( ! empty( $preorder_date ) ) {
-			$current_date = date( 'Y-m-d' );
-
-			if ( $preorder_date <= $current_date ) {
-				return false;
-			}
+	/**
+	 * Checks if the product still has the preorder checkbox checked, but its release
+	 * date has already been reached, so the preorder is no longer shown in the shop.
+	 *
+	 * @param int $post_id The ID of the post.
+	 *
+	 * @return bool
+	 */
+	public static function is_preorder_expired( int $post_id ): bool {
+		if ( get_post_meta( $post_id, '_nt_preorder', true ) !== 'yes' ) {
+			return false;
 		}
 
-		return true;
+		return self::is_release_date_reached( $post_id );
+	}
+
+	/**
+	 * Checks if the stored release date is today or in the past.
+	 * A missing or malformed date never ends the preorder.
+	 *
+	 * @param int $post_id The ID of the post.
+	 *
+	 * @return bool
+	 */
+	protected static function is_release_date_reached( int $post_id ): bool {
+		$preorder_date = (string) get_post_meta( $post_id, '_nt_preorder_date', true );
+
+		if ( ! self::is_valid_date( $preorder_date ) ) {
+			return false;
+		}
+
+		return $preorder_date <= self::get_today();
+	}
+
+	/**
+	 * Checks if the value is a real date in Y-m-d format.
+	 *
+	 * @param string $date The date to check.
+	 *
+	 * @return bool
+	 */
+	public static function is_valid_date( string $date ): bool {
+		$parsed = \DateTimeImmutable::createFromFormat( '!Y-m-d', $date );
+
+		return false !== $parsed && $parsed->format( 'Y-m-d' ) === $date;
+	}
+
+	/**
+	 * Returns today's date in the site's timezone (not the server's UTC).
+	 *
+	 * @return string
+	 */
+	public static function get_today(): string {
+		return current_time( 'Y-m-d' );
 	}
 }
