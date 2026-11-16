@@ -12,5 +12,6 @@ class Panel {
 		new Settings();
 		new Product();
 		new Importer();
+		new ExpiredPreorders();
 	}
 }

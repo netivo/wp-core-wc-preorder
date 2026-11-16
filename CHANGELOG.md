@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 1.5.0
+
+- Added admin warning on the product edit screen when preorder is checked but the release date has already passed
+- Added admin notice on the product list with the number of expired preorders and a filter showing them (`?nt_preorder_expired=1`)
+- Added `Product::is_preorder_active()` and `Product::is_preorder_expired()` helpers (single source of truth for the theme)
+- Added explanation of the release date behaviour to the preorder checkbox and release date field
+- Fixed release date comparison using the server's UTC date instead of the site timezone
+- Fixed malformed release dates being compared as text (which could hide the preorder text); invalid dates are no longer saved and the value is sanitized
+
 ## Version 1.4.0
 
 - Added preorder date

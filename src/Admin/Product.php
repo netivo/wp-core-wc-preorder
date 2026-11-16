@@ -2,6 +2,8 @@
 
 namespace Netivo\Module\WooCommerce\ProductPreorder\Admin;
 
+use Netivo\Module\WooCommerce\ProductPreorder\Product as PreorderProduct;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	header( 'HTTP/1.0 403 Forbidden' );
 	exit;
@@ -32,7 +34,7 @@ class Product {
 			'id'          => '_nt_preorder',
 //			'wrapper_class' => 'show_if_simple show_if_variable show_if_package',
 			'label'       => __( 'Przedsprzedaż', 'netivo' ),
-			'description' => __( 'Dodaje do tytułu informację o preorderze oraz w opisie datę premiery.', 'netivo' ),
+			'description' => __( 'Dodaje do tytułu informację o preorderze oraz w opisie datę premiery. Od dnia premiery oznaczenie przestaje się wyświetlać, nawet jeśli opcja pozostaje zaznaczona.', 'netivo' ),
 			'default'     => 'no',
 		];
 
@@ -41,12 +43,20 @@ class Product {
 
 	public function render_preorder_date_input(): void {
 		$date_input_html_pattern = '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])';
-		$preorder_date           = get_post_meta( get_the_ID(), '_nt_preorder_date', true );
+		$post_id                 = (int) get_the_ID();
+		$preorder_date           = get_post_meta( $post_id, '_nt_preorder_date', true );
 
 		echo '<p class="form-field">
 					<label for="_nt_preorder_date">' . esc_html__( 'Data premiery', 'netivo' ) . '</label>
 					<input type="text" class="short" name="_nt_preorder_date" id="_nt_preorder_date" value="' . esc_attr( $preorder_date ) . '" placeholder="YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( $date_input_html_pattern ) . '" />
+					<span class="description">' . esc_html__( 'Przedsprzedaż jest oznaczana do dnia poprzedzającego datę premiery. Jeśli premiera się przesuwa, zaktualizuj datę.', 'netivo' ) . '</span>
 				</p>';
+
+		if ( PreorderProduct::is_preorder_expired( $post_id ) ) {
+			echo '<p class="form-field nt-preorder-expired" style="color:#d63638;">'
+			     . esc_html__( 'Data premiery minęła – sklep nie oznacza już tego produktu jako przedsprzedaż (brak dopisku w tytule i daty premiery), mimo że opcja „Przedsprzedaż” jest zaznaczona.', 'netivo' )
+			     . '</p>';
+		}
 	}
 
 	/**
@@ -59,10 +69,13 @@ class Product {
 	public function save_product( \WC_Product $product ): void {
 		$product->update_meta_data( '_nt_preorder', ( isset( $_POST['_nt_preorder'] ) ) ? 'yes' : 'no' );
 
-		if ( ! empty( $_POST['_nt_preorder_date'] ) ) {
-			$product->update_meta_data( '_nt_preorder_date', $_POST['_nt_preorder_date'] );
-		} else {
+		$preorder_date = isset( $_POST['_nt_preorder_date'] ) ? trim( sanitize_text_field( wp_unslash( $_POST['_nt_preorder_date'] ) ) ) : '';
+
+		if ( '' === $preorder_date ) {
 			$product->delete_meta_data( '_nt_preorder_date' );
+		} elseif ( PreorderProduct::is_valid_date( $preorder_date ) ) {
+			$product->update_meta_data( '_nt_preorder_date', $preorder_date );
 		}
+		// A malformed date is ignored, so the previously saved date stays untouched.
 	}
 }

@@ -47,6 +47,24 @@ if ( ! function_exists( 'get_post_meta' ) ) {
 	}
 }
 
+if ( ! function_exists( 'current_time' ) ) {
+	function current_time( $type, $gmt = 0 ) {
+		return $GLOBALS['current_time_return'] ?? date( $type );
+	}
+}
+
+if ( ! function_exists( 'sanitize_text_field' ) ) {
+	function sanitize_text_field( $str ) {
+		return trim( strip_tags( (string) $str ) );
+	}
+}
+
+if ( ! function_exists( 'wp_unslash' ) ) {
+	function wp_unslash( $value ) {
+		return is_string( $value ) ? stripslashes( $value ) : $value;
+	}
+}
+
 if ( ! function_exists( 'get_option' ) ) {
 	function get_option( $option, $default = false ) {
 		return $GLOBALS['options_return'][ $option ] ?? $default;
@@ -56,6 +74,9 @@ if ( ! function_exists( 'get_option' ) ) {
 if ( ! class_exists( 'WC_Product' ) ) {
 	class WC_Product {
 		public function update_meta_data( $key, $value ) {
+		}
+
+		public function delete_meta_data( $key ) {
 		}
 	}
 }
