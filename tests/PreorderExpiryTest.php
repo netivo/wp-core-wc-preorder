@@ -51,6 +51,28 @@ class PreorderExpiryTest extends TestCase {
 		$this->assertTrue( Product::is_preorder_expired( 123 ) );
 	}
 
+	public function test_render_preorder_date_excludes_date_from_translation(): void {
+		$this->meta( 'yes', '2026-12-07' );
+
+		ob_start();
+		( new Product() )->render_preorder_date();
+		$html = ob_get_clean();
+
+		$this->assertSame(
+			'<p class="nt-preorder-date">Data premiery: <time class="notranslate" translate="no" datetime="2026-12-07">2026-12-07</time></p>',
+			$html
+		);
+	}
+
+	public function test_render_preorder_date_hidden_when_release_passed(): void {
+		$this->meta( 'yes', '2026-10-31' );
+
+		ob_start();
+		( new Product() )->render_preorder_date();
+
+		$this->assertSame( '', ob_get_clean() );
+	}
+
 	public function test_is_valid_date(): void {
 		$this->assertTrue( Product::is_valid_date( '2026-12-30' ) );
 		$this->assertFalse( Product::is_valid_date( '2026-02-30' ) );

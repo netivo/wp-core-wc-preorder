@@ -166,7 +166,11 @@ class Product {
 		$preorder_date = get_post_meta( $post_id, '_nt_preorder_date', true );
 
 		if ( ! empty( $preorder_date ) && $this->should_show_preorder_title( $post_id ) ) {
-			echo '<p class="">' . esc_html__( 'Data premiery: ', 'netivo' ) . esc_html( $preorder_date ) . '</p>';
+			// Keep the date out of machine translation (e.g. GTranslate), which otherwise reformats or alters it.
+			echo '<p class="nt-preorder-date">'
+			     . esc_html__( 'Data premiery: ', 'netivo' )
+			     . '<time class="notranslate" translate="no" datetime="' . esc_attr( $preorder_date ) . '">' . esc_html( $preorder_date ) . '</time>'
+			     . '</p>';
 		}
 	}
 
