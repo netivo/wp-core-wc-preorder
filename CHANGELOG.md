@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.5.1
+
+- Fixed the release date on the product page being altered by machine translation (e.g. GTranslate showed a wrong date in DE/FR); the date is now wrapped in `<time class="notranslate" translate="no">`
+- Added `nt-preorder-date` class to the release date paragraph
+
 ## Version 1.5.0
 
 - Added admin warning on the product edit screen when preorder is checked but the release date has already passed
